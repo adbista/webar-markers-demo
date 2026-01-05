@@ -16,6 +16,27 @@ html, body {
   z-index: -1;
 }
 
+@media (max-width: 900px) {
+  #arjs-video {
+    width: 100vw !important;
+    height: 100vh !important;
+    object-fit: cover;
+  }
+
+  a-scene[embedded] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+
+  .a-canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
 /* UI Panel Styling */
 :root {
   --bg-panel: rgba(25, 25, 25, 0.9);
