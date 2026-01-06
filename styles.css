@@ -19,6 +19,76 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
+
+.title { 
+  font-weight: bold; 
+  font-size: 1.2rem; 
+  margin-bottom: 10px; 
+  display: flex; 
+  justify-content: space-between; 
+
+}
+
+#infoClose { 
+  cursor: pointer; 
+  background: none; 
+  border: none; 
+  color: white; 
+  font-size: 20px; 
+}
+
+.ctaRow { 
+  display: flex; 
+  gap: 10px; 
+  margin-top: 15px; 
+}
+
+.btn { 
+  flex: 1; 
+  padding: 10px; 
+  text-align: center; 
+  border-radius: 8px; 
+  text-decoration: none; 
+  font-weight: bold; 
+  font-size: 13px; 
+}
+
+.btn-primary { 
+  background: white; 
+  color: black; 
+}
+
+.btn-sec { 
+  background: rgba(255, 255, 255, 0.1); 
+  color: white; 
+}
+
+.panelToggle{
+  position: fixed;
+  right: 12px;
+  top: 12px;
+  z-index: 9999;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  font-size: 18px;
+  line-height: 44px;
+  text-align: center;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.panelToggle.off{
+  opacity: .45;
+  filter: grayscale(1);
+}
+
+
 /* Responsive UI Panel */
 @media (min-width: 768px) {
   #infoPanel { left: 20px; bottom: 20px; width: 380px; border-radius: 16px; }
@@ -32,10 +102,3 @@
     border-radius: 20px; 
   }
 }
-
-.title { font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; display: flex; justify-content: space-between; }
-#infoClose { cursor: pointer; background: none; border: none; color: white; font-size: 20px; }
-.ctaRow { display: flex; gap: 10px; margin-top: 15px; }
-.btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; }
-.btn-primary { background: white; color: black; }
-.btn-sec { background: rgba(255, 255, 255, 0.1); color: white; }

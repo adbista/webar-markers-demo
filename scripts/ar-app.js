@@ -224,6 +224,7 @@ AFRAME.registerComponent("energy-triangle", {
  * - jak marker m0 (Nike) jest widoczny to pokaż panel Nike
  * - jak marker m1 (Apple) jest widoczny to pokaż panel Apple
  * - jak marker znika i panel był od niego -> schowaj
+ * - przycisk do włączania/wyłączania panelu (jak wyłączony to nie pokazuj nic)
  *************************************************************/
 window.addEventListener("DOMContentLoaded", () => {
   const panel = document.getElementById("infoPanel");
@@ -231,12 +232,18 @@ window.addEventListener("DOMContentLoaded", () => {
   const bodyEl = document.getElementById("infoBody");
   const closeBtn = document.getElementById("infoClose");
 
+  const toggleBtn = document.getElementById("panelToggle");
+  let panelEnabled = true;
+
   const markerNike = document.getElementById("m0");
   const markerApple = document.getElementById("m1");
 
   let visibleMarkerId = null;
 
   function showInfo(title, bodyHtml) {
+    // jeśli wyłączone -> nie pokazuj
+    if (!panelEnabled) return;
+
     titleEl.innerHTML = title;
     bodyEl.innerHTML = bodyHtml;
     panel.style.display = "block";
@@ -245,6 +252,21 @@ window.addEventListener("DOMContentLoaded", () => {
   function hideInfo() {
     panel.style.display = "none";
   }
+
+  // Toggle ON/OFF
+  toggleBtn.addEventListener("click", () => {
+    panelEnabled = !panelEnabled;
+
+    toggleBtn.classList.toggle("off", !panelEnabled);
+    toggleBtn.setAttribute("aria-pressed", String(panelEnabled));
+    toggleBtn.textContent = panelEnabled ? "ℹ️" : "🚫";
+
+    // jak user wyłączy -> schowaj panel i zapomnij “kto był widoczny”
+    if (!panelEnabled) {
+      visibleMarkerId = null;
+      hideInfo();
+    }
+  });
 
   closeBtn.addEventListener("click", () => {
     visibleMarkerId = null;
@@ -285,6 +307,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   markerNike.addEventListener("markerFound", () => {
+    if (!panelEnabled) return; // <--- KLUCZ
     visibleMarkerId = "nike";
     showInfo(content.nike.title, content.nike.html);
   });
@@ -296,6 +319,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   markerApple.addEventListener("markerFound", () => {
+    if (!panelEnabled) return; // <--- KLUCZ
     visibleMarkerId = "apple";
     showInfo(content.apple.title, content.apple.html);
   });
