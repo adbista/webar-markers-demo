@@ -233,7 +233,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const closeBtn = document.getElementById("infoClose");
 
   const toggleBtn = document.getElementById("panelToggle");
-  let panelEnabled = true;
+  let panelEnabled = false;
 
   const markerNike = document.getElementById("m0");
   const markerApple = document.getElementById("m1");
@@ -259,7 +259,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     toggleBtn.classList.toggle("off", !panelEnabled);
     toggleBtn.setAttribute("aria-pressed", String(panelEnabled));
-    toggleBtn.textContent = panelEnabled ? "ℹ️" : "🚫";
 
     // jak user wyłączy -> schowaj panel i zapomnij “kto był widoczny”
     if (!panelEnabled) {
