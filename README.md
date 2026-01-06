@@ -10,9 +10,13 @@ This AR application uses **A-Frame** and **AR.js** to create interactive experie
 
 
 
+
+
+
+
 ## 🎥 Demo
 
-[![AR Demo](demo-preview.png)](https://github.com/user-attachments/assets/8e3b2cca-3659-4e9c-9dac-31576f73ccf6)
+[![AR Demo](demo-preview.png)](https://github.com/user-attachments/assets/68ed8797-9e3d-43dc-9f87-2e8a0fa068cf)
 
 
 
