@@ -462,16 +462,6 @@ function gameOver() {
 
 // Initialize hand gesture detection using MediaPipe
 function initHandGestureDetection() {
-    // Check if mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-        console.log('Mobile device detected - gesture detection disabled for better performance');
-        if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Wyłączone (mobilne)';
-        gestureEnabled = false;
-        return; // Exit early to prevent any camera access attempts
-    }
-    
     if (typeof Hands === 'undefined') {
         console.log('MediaPipe Hands not loaded, gesture detection disabled');
         if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Niedostępne';
