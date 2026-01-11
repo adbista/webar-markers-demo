@@ -78,7 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const uiElements = [
         document.getElementById('ui'),
         document.getElementById('gesture-legend'),
-        document.getElementById('controls')
+        document.getElementById('gesture-challenge'),
+        document.getElementById('gesture-success'),
+        document.getElementById('gesture-fail'),
+        document.getElementById('instructions')
     ];
     
     if (toggleUIBtn) {
