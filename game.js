@@ -40,9 +40,9 @@ let visibleMarkers = {
 
 const colors = ['red', 'green', 'blue'];
 const colorMap = {
-    'red': { element: null, original: '#FF0000', bright: '#FF6666', button: null, light: null },
-    'green': { element: null, original: '#00FF00', bright: '#66FF66', button: null, light: null },
-    'blue': { element: null, original: '#0000FF', bright: '#6666FF', button: null, light: null }
+    'red': { element: null, original: '#FF0000', bright: '#FFFFFF', button: null, light: null },
+    'green': { element: null, original: '#00FF00', bright: '#FFFFFF', button: null, light: null },
+    'blue': { element: null, original: '#0000FF', bright: '#FFFFFF', button: null, light: null }
 };
 
 // DOM elements
@@ -353,18 +353,32 @@ async function showSequence() {
 function flashSphere(color, withSound = false) {
     return new Promise((resolve) => {
         const sphere = colorMap[color].element;
+        const light = colorMap[color].light;
         if (!sphere) {
             resolve();
             return;
         }
 
-        // Flash effect - tylko zmiana koloru, bez skalowania
+        // Flash effect - biały kolor + większy rozmiar + światło
         sphere.setAttribute('color', colorMap[color].bright);
+        sphere.setAttribute('scale', '1.5 1.5 1.5');
+        sphere.setAttribute('metalness', '0.9');
+        sphere.setAttribute('roughness', '0.1');
+        
+        if (light) {
+            light.setAttribute('intensity', '3');
+        }
         
         if (withSound) playSound(color);
 
         setTimeout(() => {
             sphere.setAttribute('color', colorMap[color].original);
+            sphere.setAttribute('scale', '1 1 1');
+            sphere.setAttribute('metalness', '0.5');
+            sphere.setAttribute('roughness', '0.5');
+            if (light) {
+                light.setAttribute('intensity', '0');
+            }
             resolve();
         }, 500);
     });
@@ -445,8 +459,16 @@ function gameOver() {
 // ============== ENHANCED FEATURES ==============
 
 // Initialize hand gesture detection using MediaPipe
-function initHandGestureDetection() {
-    if (typeof Hands === 'undefined') {
+function initHandGestureDetection() {    // Check if mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        console.log('Mobile device detected - gesture detection disabled for better performance');
+        if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Wyłączone (mobilne)';
+        gestureEnabled = false;
+        return;
+    }
+        if (typeof Hands === 'undefined') {
         console.log('MediaPipe Hands not loaded, gesture detection disabled');
         if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Niedostępne';
         return;
@@ -619,15 +641,19 @@ function flashSphereWithLight(color) {
     
     if (sphere) {
         sphere.setAttribute('color', colorMap[color].bright);
-        sphere.setAttribute('scale', '1.3 1.3 1.3');
+        sphere.setAttribute('scale', '1.6 1.6 1.6');
+        sphere.setAttribute('metalness', '1');
+        sphere.setAttribute('roughness', '0');
         
         if (light) {
-            light.setAttribute('intensity', '2');
+            light.setAttribute('intensity', '4');
         }
         
         setTimeout(() => {
             sphere.setAttribute('color', colorMap[color].original);
             sphere.setAttribute('scale', '1 1 1');
+            sphere.setAttribute('metalness', '0.5');
+            sphere.setAttribute('roughness', '0.5');
             if (light) {
                 light.setAttribute('intensity', '0');
             }
