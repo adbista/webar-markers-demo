@@ -472,15 +472,17 @@ function initHandGestureDetection() {
         
         hands.onResults(onHandGestureResults);
         
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then((stream) => {
-                videoElement.srcObject = stream;
-                videoElement.play();
-                
-                camera = new Camera(videoElement, {
+        // Wait for AR.js to initialize camera first
+        setTimeout(() => {
+            // Try to get AR.js video element
+            const arVideo = document.querySelector('video');
+            if (arVideo && arVideo.srcObject) {
+                // Use existing AR camera stream
+                console.log('Using AR.js camera stream for gestures');
+                camera = new Camera(arVideo, {
                     onFrame: async () => {
                         if (gestureEnabled && gameStarted) {
-                            await hands.send({ image: videoElement });
+                            await hands.send({ image: arVideo });
                         }
                     },
                     width: 640,
@@ -490,12 +492,43 @@ function initHandGestureDetection() {
                 camera.start();
                 gestureEnabled = true;
                 if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Aktywne';
-                console.log('Hand gesture detection initialized!');
-            })
-            .catch((error) => {
-                console.log('Camera access denied:', error);
-                if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Brak kamery';
-            });
+                console.log('Hand gesture detection initialized with AR camera!');
+            } else {
+                // Fallback: try to get camera with better constraints
+                const constraints = {
+                    video: {
+                        facingMode: 'environment', // Rear camera for AR
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                };
+                
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then((stream) => {
+                        videoElement.srcObject = stream;
+                        videoElement.play();
+                        
+                        camera = new Camera(videoElement, {
+                            onFrame: async () => {
+                                if (gestureEnabled && gameStarted) {
+                                    await hands.send({ image: videoElement });
+                                }
+                            },
+                            width: 640,
+                            height: 480
+                        });
+                        
+                        camera.start();
+                        gestureEnabled = true;
+                        if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Aktywne';
+                        console.log('Hand gesture detection initialized with new camera!');
+                    })
+                    .catch((error) => {
+                        console.log('Camera access denied:', error);
+                        if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Brak kamery';
+                    });
+            }
+        }, 3000); // Wait 3 seconds for AR.js to initialize
     } catch (e) {
         console.log('Gesture detection error:', e);
         if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Błąd';
