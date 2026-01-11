@@ -1,17 +1,17 @@
 // AR Memory Game - Enhanced with Gesture Sound Challenges
 let sequence = [];
-let playerSequence = [];
+let playerSuccessIndex = 0;
 let level = 1;
 let score = 0;
 let isShowingSequence = false;
 let canPlay = false;
 let gameStarted = false;
 let combo = 0;
+let inputLock = false;
 
 // Hand gesture detection
 let gestureEnabled = false;
 let hands = null;
-let camera = null;
 let gestureStatusEl = null;
 let comboEl = null;
 let lastGesture = null;
@@ -72,6 +72,26 @@ document.addEventListener('DOMContentLoaded', () => {
     colorMap.red.button = document.getElementById('btnRed');
     colorMap.green.button = document.getElementById('btnGreen');
     colorMap.blue.button = document.getElementById('btnBlue');
+
+    // Setup UI toggle button
+    const toggleUIBtn = document.getElementById('toggleUI');
+    const uiElements = [
+        document.getElementById('ui'),
+        document.getElementById('gesture-legend'),
+        document.getElementById('controls')
+    ];
+    
+    if (toggleUIBtn) {
+        toggleUIBtn.addEventListener('click', () => {
+            uiElements.forEach(el => {
+                if (el) {
+                    el.classList.toggle('ui-hidden');
+                }
+            });
+            // Toggle button icon
+            toggleUIBtn.textContent = toggleUIBtn.textContent === '👁️' ? '👁️‍🗨️' : '👁️';
+        });
+    }
 
     // Add click handlers to buttons
     setupButtonHandlers();
@@ -141,6 +161,8 @@ function setupMarkerDetection() {
 function checkAllMarkersVisible() {
     const allVisible = Object.values(visibleMarkers).every(visible => visible === true);
     
+    console.log('Sprawdzanie markerów:', visibleMarkers, 'Wszystkie widoczne:', allVisible, 'Gra rozpoczęta:', gameStarted);
+    
     if (allVisible && !gameStarted) {
         console.log('🎮 Wszystkie markery widoczne! Rozpoczynam grę...');
         gameStarted = true;
@@ -190,23 +212,17 @@ function setupARClickHandlers() {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Get color from the element's data attribute
-                const colorFromElement = item.el.getAttribute('data-color');
-                console.log('AR Click - Element:', item.el.id, 'Expected color:', item.color, 'Data-color:', colorFromElement);
-                
                 // Verify the marker is visible and game started before allowing click
                 const marker = item.el.parentElement;
                 if (marker && marker.object3D.visible && gameStarted) {
                     handleButtonClick(item.color);
-                } else {
-                    console.log('Marker not visible or game not started, ignoring click');
                 }
             };
 
             // Mouse click
             item.el.addEventListener('click', clickHandler);
 
-            // Touch event
+            // Touch event (inputLock prevents double-triggering)
             item.el.addEventListener('touchstart', clickHandler);
         }
     });
@@ -222,24 +238,13 @@ function setupButtonHandlers() {
 }
 
 function handleButtonClick(color) {
-    console.log('=== handleButtonClick wywołane ===');
-    console.log('Kolor:', color);
-    console.log('canPlay:', canPlay, 'isShowingSequence:', isShowingSequence, 'gameStarted:', gameStarted);
-    console.log('Aktualna sekwencja gry:', sequence);
-    console.log('Dotychczasowa sekwencja gracza:', playerSequence);
-    console.log('Oczekiwany następny kolor:', sequence[playerSequence.length]);
-    
-    if (!gameStarted) {
-        console.log('⛔ ZABLOKOWANE - gra jeszcze nie rozpoczęta (wyceluj wszystkie markery)');
-        return;
-    }
-    
-    if (!canPlay || isShowingSequence) {
-        console.log('⛔ ZABLOKOWANE - nie można kliknąć teraz');
-        return;
-    }
+    if (!gameStarted) return;
+    if (inputLock) return;  // Prevent double-tap/click
+    if (!canPlay || isShowingSequence || gestureChallengeActive) return;
 
-    // Disable all buttons temporarily
+    // Lock input immediately to prevent duplicate events
+    inputLock = true;
+    canPlay = false;
     disableButtons(true);
 
     // Visual feedback on button
@@ -254,35 +259,28 @@ function handleButtonClick(color) {
     playSound(color);
     triggerParticleEffect(color);
 
-    // Add to player sequence
-    playerSequence.push(color);
-    console.log('Po dodaniu, sekwencja gracza:', playerSequence);
-
     // Check if correct
-    const currentIndex = playerSequence.length - 1;
-    const expectedColor = sequence[currentIndex];
-    const actualColor = playerSequence[currentIndex];
+    const expectedColor = sequence[playerSuccessIndex];
     
-    console.log('Sprawdzanie: index', currentIndex, 'oczekiwano:', expectedColor, 'otrzymano:', actualColor);
-    
-    if (actualColor !== expectedColor) {
+    if (color !== expectedColor) {
         // Wrong!
-        console.log('❌ BŁĄD! Niepoprawny kolor');
+        inputLock = false;
         combo = 0;
         updateCombo();
         gameOver();
         return;
     }
 
-    console.log('✅ Poprawny kolor!');
+    // Correct - increment index
+    playerSuccessIndex++;
     combo++;
     updateCombo();
 
     // Check if sequence complete
-    if (playerSequence.length === sequence.length) {
+    if (playerSuccessIndex === sequence.length) {
         // Correct sequence!
         console.log('🎉 Cała sekwencja poprawna!');
-        canPlay = false;
+        inputLock = false;
         const bonusPoints = combo > 5 ? level * 15 : level * 10;
         score += bonusPoints;
         scoreEl.textContent = `Wynik: ${score}`;
@@ -298,9 +296,12 @@ function handleButtonClick(color) {
         }, 2000);
     } else {
         // Re-enable buttons after short delay
-        console.log('Czekam na następny kolor...');
         setTimeout(() => {
-            if (canPlay) disableButtons(false);
+            if (gameStarted && !isShowingSequence && !gestureChallengeActive) {
+                canPlay = true;
+                disableButtons(false);
+            }
+            inputLock = false;
         }, 300);
     }
 }
@@ -313,7 +314,7 @@ function disableButtons(disabled) {
 }
 
 function startNewRound() {
-    playerSequence = [];
+    playerSuccessIndex = 0;
     canPlay = false;
     disableButtons(true);
     
@@ -426,8 +427,6 @@ function gameOver() {
     statusEl.textContent = '❌ Źle! Koniec gry';
     statusEl.style.background = 'rgba(255, 0, 0, 0.8)';
     
-    console.log('Game Over! Ostatnia sekwencja:', sequence, 'Gracz próbował:', playerSequence);
-    
     // Play error sound
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -459,26 +458,24 @@ function gameOver() {
 // ============== ENHANCED FEATURES ==============
 
 // Initialize hand gesture detection using MediaPipe
-function initHandGestureDetection() {    // Check if mobile device
+function initHandGestureDetection() {
+    // Check if mobile device
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
         console.log('Mobile device detected - gesture detection disabled for better performance');
         if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Wyłączone (mobilne)';
         gestureEnabled = false;
-        return;
+        return; // Exit early to prevent any camera access attempts
     }
-        if (typeof Hands === 'undefined') {
+    
+    if (typeof Hands === 'undefined') {
         console.log('MediaPipe Hands not loaded, gesture detection disabled');
         if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Niedostępne';
         return;
     }
     
     try {
-        const videoElement = document.createElement('video');
-        videoElement.style.display = 'none';
-        document.body.appendChild(videoElement);
-        
         hands = new Hands({
             locateFile: (file) => {
                 return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
@@ -494,65 +491,47 @@ function initHandGestureDetection() {    // Check if mobile device
         
         hands.onResults(onHandGestureResults);
         
-        // Wait for AR.js to initialize camera first
-        setTimeout(() => {
-            // Try to get AR.js video element
-            const arVideo = document.querySelector('video');
-            if (arVideo && arVideo.srcObject) {
-                // Use existing AR camera stream
-                console.log('Using AR.js camera stream for gestures');
-                camera = new Camera(arVideo, {
-                    onFrame: async () => {
-                        if (gestureEnabled && gameStarted) {
-                            await hands.send({ image: arVideo });
-                        }
-                    },
-                    width: 640,
-                    height: 480
-                });
+        // Wait for AR.js scene to load and camera to initialize
+        const scene = document.querySelector('a-scene');
+        scene.addEventListener('loaded', async () => {
+            // Wait additional time for AR.js camera initialization
+            setTimeout(() => {
+                // Get AR.js video element
+                const video = document.querySelector('video');
+                if (!video) {
+                    console.error('Brak video z AR.js w DOM');
+                    if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Brak video';
+                    return;
+                }
                 
-                camera.start();
+                // iOS compatibility helpers
+                video.setAttribute('playsinline', '');
+                video.setAttribute('webkit-playsinline', '');
+                video.muted = true;
+                
+                console.log('Używam strumienia video z AR.js dla gestów');
+                
+                // Start gesture detection loop using AR.js video
+                async function gestureLoop() {
+                    if (gestureEnabled && gameStarted && video.readyState >= 2) {
+                        try {
+                            await hands.send({ image: video });
+                        } catch (e) {
+                            console.log('Błąd podczas wysyłania ramki do MediaPipe:', e);
+                        }
+                    }
+                    requestAnimationFrame(gestureLoop);
+                }
+                
                 gestureEnabled = true;
                 if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Aktywne';
-                console.log('Hand gesture detection initialized with AR camera!');
-            } else {
-                // Fallback: try to get camera with better constraints
-                const constraints = {
-                    video: {
-                        facingMode: 'environment', // Rear camera for AR
-                        width: { ideal: 640 },
-                        height: { ideal: 480 }
-                    }
-                };
+                console.log('Detekcja gestów zainicjowana z kamerą AR.js!');
                 
-                navigator.mediaDevices.getUserMedia(constraints)
-                    .then((stream) => {
-                        videoElement.srcObject = stream;
-                        videoElement.play();
-                        
-                        camera = new Camera(videoElement, {
-                            onFrame: async () => {
-                                if (gestureEnabled && gameStarted) {
-                                    await hands.send({ image: videoElement });
-                                }
-                            },
-                            width: 640,
-                            height: 480
-                        });
-                        
-                        camera.start();
-                        gestureEnabled = true;
-                        if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Aktywne';
-                        console.log('Hand gesture detection initialized with new camera!');
-                    })
-                    .catch((error) => {
-                        console.log('Camera access denied:', error);
-                        if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Brak kamery';
-                    });
-            }
-        }, 3000); // Wait 3 seconds for AR.js to initialize
+                gestureLoop();
+            }, 2000); // Wait 2 seconds for AR.js camera to be ready
+        });
     } catch (e) {
-        console.log('Gesture detection error:', e);
+        console.log('Błąd detekcji gestów:', e);
         if (gestureStatusEl) gestureStatusEl.textContent = '✋ Gesty: Błąd';
     }
 }
