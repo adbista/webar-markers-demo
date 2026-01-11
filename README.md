@@ -29,14 +29,12 @@ During gameplay, random audio-visual challenges may appear requiring quick hand 
 ### Challenge Types
 
 - High Sound (880 Hz) - Requires thumbs up gesture
-- Low Sound (220 Hz) - Requires peace sign gesture
 
 ### Challenge Mechanics
 
 - Audio cue plays with visual prompt showing required gesture
-- 3-second countdown timer
-- Correct gesture awards 20-35 bonus points (depending on reaction speed)
-- Failed challenge results in no point penalty but lost bonus opportunity
+- 10-second countdown timer
+- Failed challenge results in gameover
 
 ## Advanced Features
 
@@ -53,7 +51,7 @@ During gameplay, random audio-visual challenges may appear requiring quick hand 
 ### Hand Gesture Recognition
 
 - MediaPipe Hands integration for real-time gesture detection
-- Two gesture types: thumbs up and peace sign
+- Gesture type: thumbs up
 - Independent from marker-based gameplay
 - Visual status indicator showing gesture system state
 
@@ -114,15 +112,15 @@ Open: `http://localhost:8000`
 3. Allow camera access
 4. Point camera at all 3 markers to start
 5. Watch the sequence of flashing spheres
-6. Repeat sequence using buttons, AR markers, or gestures
-7. Complete gesture challenges when they appear
+6. Repeat sequence using buttons and AR markers
+7. Complete gesture challenge when it appear
 8. Continue until making a mistake
 
 ## Technologies Used
 
 ### Core Frameworks
 
-- A-Frame 1.4.2 - WebVR/AR framework
+- A-Frame 1.6.0 - WebVR/AR framework
 - AR.js 3.4.5 - Marker-based AR tracking
 - MediaPipe Hands - Hand gesture recognition
 - Web Audio API - Sound synthesis
@@ -144,98 +142,9 @@ Open: `http://localhost:8000`
 - Camera integration
 - Custom gesture detection algorithms
 
-## Project Structure
 
-```
-ar2/
-├── index.html          # Main HTML with A-Frame scene
-├── game.js            # Game logic and gesture detection
-├── style.css          # Styles and CSS animations
-├── README.md          # This file
-├── NOWE_FUNKCJE.md   # Feature documentation (Polish)
-└── assets/
-    ├── marker.patt         # Red marker pattern
-    ├── markerApple.patt    # Green marker pattern
-    ├── dot0.patt          # Blue marker pattern
-    └── license.txt        # License information
-```
-
-## Scoring System
-
-- Base points per level: 10 points
-- Combo bonus (combo greater than 5): 50% increase
-- Gesture challenge base: 20 points
-- Gesture speed bonus: +5 points per second remaining
-- Maximum gesture bonus: 35 points (1-second reaction)
-
-## Visual Effects
-
-### A-Frame Animations
-
-- Continuous rotation on Y-axis
-- Particle emission and physics
-- Dynamic light intensity
-- Material property changes
-- Scale transformations
-
-### CSS Animations
-
-- Pulse effect on UI elements
-- Glow effect on gesture status
-- Flash effect on buttons
-- Challenge panel animations
-
-## Troubleshooting
-
-### Camera Issues
-
-- Ensure HTTPS or localhost connection
-- Check browser camera permissions
-- Verify no other application is using camera
-
-### Marker Detection Problems
-
-- Print markers clearly with high contrast
-- Ensure adequate lighting
-- Hold markers flat and stable
-- Maintain appropriate distance from camera
-
-### Gesture Recognition Not Working
-
-- MediaPipe may not load on all browsers
-- Check console for loading errors
-- Safari iOS has limited support
-- Ensure hand is visible and well-lit
-
-### Performance Issues
-
-- Close unnecessary browser tabs
-- Try different browser
-- Reduce particle count if needed
-- Check device GPU capabilities
-
-## Development Notes
-
-This project demonstrates:
-- Integration of multiple AR/VR technologies
-- Real-time computer vision for gesture recognition
-- Advanced A-Frame component usage
-- Web Audio API for dynamic sound generation
-- Event-driven game architecture
-- Responsive design for mobile and desktop
-
-## Future Enhancements
-
-Possible improvements:
-- Additional gesture types
-- Difficulty levels with adjustable speed
-- Multiplayer support
-- Persistent leaderboards
-- Sound themes
-- Additional challenge types
-- Vibration feedback on mobile
-- Tutorial mode
-
+## DEMO
+![demo-preview](https://github.com/user-attachments/assets/82ed652b-ec8a-48ec-943a-34c0b6f33f1d)
 
 ---
 
