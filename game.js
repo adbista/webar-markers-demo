@@ -8,6 +8,7 @@ let canPlay = false;
 let gameStarted = false;
 let combo = 0;
 let inputLock = false;
+let repeatSequenceUsed = false;
 
 // Hand gesture detection
 let gestureEnabled = false;
@@ -77,8 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleUIBtn = document.getElementById('toggleUI');
     const uiElements = [
         document.getElementById('ui'),
-        document.getElementById('gesture-legend'),
-        document.getElementById('gesture-challenge'),
         document.getElementById('gesture-success'),
         document.getElementById('gesture-fail'),
         document.getElementById('instructions')
@@ -320,6 +319,7 @@ function startNewRound() {
     playerSuccessIndex = 0;
     canPlay = false;
     disableButtons(true);
+    repeatSequenceUsed = false;
     
     // Add new color to sequence
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -546,9 +546,11 @@ function onHandGestureResults(results) {
             if (gesture === currentChallenge.gesture) {
                 console.log(`Correct gesture: ${gesture}!`);
                 handleCorrectGesture();
-            } else {
-                console.log(`Wrong gesture: ${gesture}, expected: ${currentChallenge.gesture}`);
             }
+        } else if (gesture === 'open_palm' && !isShowingSequence && gameStarted && !gestureChallengeActive) {
+            // OPEN PALM = REPEAT SEQUENCE (works anytime except during showing)
+            console.log('🖐️ Gest: Otwarta dłoń = POWTÓRZ SEKWENCJĘ');
+            repeatSequence();
         }
         
         // Reset gesture after timeout
@@ -561,35 +563,73 @@ function onHandGestureResults(results) {
 
 // Detect specific hand gestures
 function detectGesture(landmarks) {
-    // Simple gesture detection based on finger positions
+    // Get finger tip and base positions
     const thumbTip = landmarks[4];
+    const thumbBase = landmarks[2];
     const indexTip = landmarks[8];
-    const middleTip = landmarks[12];
-    const ringTip = landmarks[16];
-    const pinkyTip = landmarks[20];
-    
-    const wrist = landmarks[0];
     const indexBase = landmarks[5];
+    const middleTip = landmarks[12];
     const middleBase = landmarks[9];
+    const ringTip = landmarks[16];
+    const ringBase = landmarks[13];
+    const pinkyTip = landmarks[20];
+    const pinkyBase = landmarks[17];
     
-    // Calculate if fingers are extended
-    const thumbUp = thumbTip.y < indexBase.y;
-    const indexUp = indexTip.y < indexBase.y;
-    const middleUp = middleTip.y < middleBase.y;
-    const ringDown = ringTip.y > middleBase.y;
-    const pinkyDown = pinkyTip.y > middleBase.y;
+    // Calculate if fingers are extended (comparing tip vs base Y position)
+    const thumbExtended = Math.abs(thumbTip.x - thumbBase.x) > 0.05;
+    const indexExtended = indexTip.y < indexBase.y;
+    const middleExtended = middleTip.y < middleBase.y;
+    const ringExtended = ringTip.y < ringBase.y;
+    const pinkyExtended = pinkyTip.y < pinkyBase.y;
     
-    // Thumbs up gesture -> High Sound
-    if (thumbUp && !indexUp && !middleUp) {
+    // Count extended fingers
+    let fingerCount = 0;
+    if (indexExtended) fingerCount++;
+    if (middleExtended) fingerCount++;
+    if (ringExtended) fingerCount++;
+    if (pinkyExtended) fingerCount++;
+    
+    // Open palm (all 5 fingers) -> REPEAT SEQUENCE
+    if (fingerCount === 4 && thumbExtended) {
+        return 'open_palm';
+    }
+    
+    // Thumbs up -> For challenges
+    if (thumbExtended && !indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
         return 'thumbs_up';
     }
     
-    // Peace sign (index + middle up) -> Low Sound
-    if (indexUp && middleUp && ringDown && pinkyDown) {
-        return 'peace';
+    return null;
+}
+
+// Repeat current sequence (gesture control)
+function repeatSequence() {
+    if (!canPlay || isShowingSequence || sequence.length === 0) return;
+    
+    // Check if already used this round
+    if (repeatSequenceUsed) {
+        statusEl.textContent = '❌ Powtórzenie już użyte!';
+        statusEl.style.background = 'rgba(255, 0, 0, 0.8)';
+        setTimeout(() => {
+            statusEl.textContent = '👆 Twoja kolej!';
+            statusEl.style.background = 'rgba(0, 200, 0, 0.8)';
+        }, 1500);
+        return;
     }
     
-    return null;
+    // Mark as used and deduct points
+    repeatSequenceUsed = true;
+    const pointsDeducted = 10;
+    score = Math.max(0, score - pointsDeducted);
+    scoreEl.textContent = `Wynik: ${score} (-${pointsDeducted})`;
+    
+    canPlay = false;
+    statusEl.textContent = '🔄 Powtarzam sekwencję... (-10 pkt)';
+    statusEl.style.background = 'rgba(138, 43, 226, 0.8)';
+    
+    setTimeout(() => {
+        showSequence();
+    }, 500);
 }
 
 // Update combo display
@@ -698,13 +738,11 @@ function triggerGestureChallenge() {
         return;
     }
     
-    const gestureKeys = Object.keys(gestureTypes);
-    const randomGesture = gestureKeys[Math.floor(Math.random() * gestureKeys.length)];
-    
+    // Always use thumbs_up gesture
     currentChallenge = {
-        gesture: randomGesture,
-        emoji: gestureTypes[randomGesture].emoji,
-        sound: gestureTypes[randomGesture].sound
+        gesture: 'thumbs_up',
+        emoji: '👍',
+        sound: 'high'
     };
     
     gestureChallengeActive = true;
@@ -777,11 +815,6 @@ function handleCorrectGesture() {
     clearInterval(challengeTimer);
     gestureChallengeActive = false;
     
-    // Award bonus points
-    const bonusPoints = 20 + (challengeTimeLeft * 5);
-    score += bonusPoints;
-    scoreEl.textContent = `Wynik: ${score}`;
-    
     // Hide challenge UI
     if (gestureChallengeEl) gestureChallengeEl.style.display = 'none';
     
@@ -795,7 +828,7 @@ function handleCorrectGesture() {
     
     // Show success message
     if (statusEl) {
-        statusEl.textContent = `Swietnie! +${bonusPoints} punktow!`;
+        statusEl.textContent = 'Świetnie! Uniknąłeś przegrańej!';
         statusEl.style.background = 'rgba(0, 255, 0, 0.9)';
     }
     
@@ -824,7 +857,7 @@ function handleFailedGesture() {
     // Hide challenge UI
     if (gestureChallengeEl) gestureChallengeEl.style.display = 'none';
     
-    // Show fail animation
+    // Show fail animation briefly, then game over
     if (gestureFailEl) {
         gestureFailEl.style.display = 'block';
     }
@@ -834,25 +867,16 @@ function handleFailedGesture() {
     
     // Show fail message
     if (statusEl) {
-        statusEl.textContent = 'Nie zdazyles!';
-        statusEl.style.background = 'rgba(255, 140, 0, 0.8)';
+        statusEl.textContent = 'Nie zdążyłeś z gestem!';
+        statusEl.style.background = 'rgba(255, 0, 0, 0.8)';
     }
     
-    // Hide fail animation and resume game
+    // Game over after showing fail animation
     setTimeout(() => {
         if (gestureFailEl) gestureFailEl.style.display = 'none';
         currentChallenge = null;
-        
-        // Resume game
-        if (gameStarted && !isShowingSequence) {
-            canPlay = true;
-            disableButtons(false);
-            if (statusEl) {
-                statusEl.textContent = 'Twoja kolej - klikaj przyciski lub markery!';
-                statusEl.style.background = 'rgba(0, 128, 255, 0.8)';
-            }
-        }
-    }, 2000);
+        gameOver();
+    }, 1500);
 }
 
 // Play success sound for correct gesture
