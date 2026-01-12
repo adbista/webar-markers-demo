@@ -14,21 +14,24 @@ export const CONFIG = {
             bright: '#FFFFFF',
             element: null,
             button: null,
-            light: null
+            light: null,
+            indicator: null
         },
         green: { 
             original: '#00FF00', 
             bright: '#FFFFFF',
             element: null,
             button: null,
-            light: null
+            light: null,
+            indicator: null
         },
         blue: { 
             original: '#0000FF', 
             bright: '#FFFFFF',
             element: null,
             button: null,
-            light: null
+            light: null,
+            indicator: null
         }
     },
     
@@ -54,8 +57,8 @@ export const CONFIG = {
     // Gesture challenge settings
     GESTURE_CHALLENGE: {
         ENABLED: true,
-        TRIGGER_CHANCE: 0.3,
-        TIME_LIMIT: 4,
+        TRIGGER_CHANCE: 0.5,
+        TIME_LIMIT: 15,
         CHECK_INTERVAL: 8000,
         BONUS_POINTS_MIN: 20,
         BONUS_POINTS_MAX: 35

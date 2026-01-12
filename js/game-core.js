@@ -100,6 +100,11 @@ export class ARMemoryGame {
         CONFIG.COLOR_MAP.green.light = document.getElementById('light2');
         CONFIG.COLOR_MAP.blue.light = document.getElementById('light3');
         
+        // Get indicator references
+        CONFIG.COLOR_MAP.red.indicator = document.getElementById('indicator1');
+        CONFIG.COLOR_MAP.green.indicator = document.getElementById('indicator2');
+        CONFIG.COLOR_MAP.blue.indicator = document.getElementById('indicator3');
+        
         // Get button references
         CONFIG.COLOR_MAP.red.button = this.ui.elements.btnRed;
         CONFIG.COLOR_MAP.green.button = this.ui.elements.btnGreen;
