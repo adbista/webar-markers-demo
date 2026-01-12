@@ -144,7 +144,7 @@ Open: `http://localhost:8000`
 
 
 ## DEMO
-![demo-preview](https://github.com/user-attachments/assets/82ed652b-ec8a-48ec-943a-34c0b6f33f1d)
+![demo-preview](https://github.com/user-attachments/assets/c220d6b9-1e68-4deb-b961-1c135c7553bc)
 
 ---
 
