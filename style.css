@@ -39,7 +39,7 @@ body {
 /* gdy gra blokuje input */
 #hitZone.disabled{
   opacity: 0.35;
-  filter: grayscale(0.2);
+  /* filter: grayscale(0.2); */
 }
 
 
@@ -492,7 +492,7 @@ body {
 .color-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    filter: grayscale(0.3);
+    /* filter: grayscale(0.3); */
 }
 
 .red-btn {
