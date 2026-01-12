@@ -68,6 +68,12 @@ export class ARMemoryGame {
     onSceneLoaded() {
         console.log('📦 A-Frame scene loaded');
         
+        // Hide AR.js loader
+        const loader = document.querySelector('.arjs-loader');
+        if (loader) {
+            loader.style.display = 'none';
+        }
+        
         // Get model references
         CONFIG.COLOR_MAP.red.element = document.getElementById('sphere1');
         CONFIG.COLOR_MAP.green.element = document.getElementById('sphere2');
