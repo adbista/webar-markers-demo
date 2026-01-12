@@ -711,22 +711,30 @@ body {
 a-scene {
     width: 100% !important;
     height: 100% !important;
+    display: block !important;
 }
 
 a-scene canvas {
     width: 100% !important;
     height: 100% !important;
+    display: block !important;
 }
 
 video {
     filter: none !important;
     -webkit-filter: none !important;
+    transform: none !important;
 }
 
-/* Ensure AR camera feed is not affected by any filters */
+/* Ensure AR camera feed is not affected by any filters or overlays */
 .a-canvas, canvas {
     filter: none !important;
     -webkit-filter: none !important;
     opacity: 1 !important;
-    background: transparent !important;
+}
+
+/* Force video to full brightness */
+video[data-aframe-video] {
+    filter: brightness(1.0) contrast(1.0) !important;
+    -webkit-filter: brightness(1.0) contrast(1.0) !important;
 }

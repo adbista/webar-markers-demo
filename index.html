@@ -94,10 +94,9 @@
 
     <a-scene
         embedded
-        arjs="sourceType: webcam"
+        arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
         vr-mode-ui="enabled: false"
-        renderer="precision: medium;"
-        background="transparent: true"
+        renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;"
         cursor="rayOrigin: mouse">
         
         <!-- Marker 1 - Czerwony -->
