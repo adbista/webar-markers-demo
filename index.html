@@ -10,7 +10,7 @@
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
-    <script src="game.js"></script>
+    <script type="module" src="js/main.js"></script>
 </head>
 <body>
     <div id="ui">
@@ -92,31 +92,36 @@
             <!-- Punkt światła -->
             <a-light type="point" color="#FF0000" intensity="0" position="0 0.5 0" id="light1"></a-light>
             
-            <!-- Główna kula z animacją -->
+            <!-- Czerwona kula -->
             <a-sphere
                 id="sphere1"
                 position="0 0.5 0"
-                radius="0.4"
+                radius="0.3"
                 color="#FF0000"
-                data-color="red"
                 metalness="0.5"
-                roughness="0.2"
-                animation="property: rotation; to: 0 360 0; dur: 3000; easing: linear; loop: true">
+                roughness="0.5"
+                data-color="red"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear"
+                animation__float="property: position; from: 0 0.5 0; to: 0 0.55 0; dir: alternate; loop: true; dur: 3000; easing: easeInOutSine">
             </a-sphere>
             
-            <!-- Pierścień wokół kuli -->
-            <a-torus
-                position="0 0.5 0"
-                radius="0.5"
-                radius-tubular="0.02"
+            <!-- Pierścień orbitujący -->
+            <a-torus 
+                radius="0.35" 
+                radius-tubular="0.015" 
                 color="#FF6666"
+                position="0 0.5 0"
+                rotation="90 0 0"
                 opacity="0.6"
-                animation="property: rotation; to: 360 0 0; dur: 4000; easing: linear; loop: true">
+                metalness="0.8"
+                roughness="0.2"
+                animation="property: rotation; to: 90 360 0; loop: true; dur: 4000; easing: linear"
+                animation__pulse="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine">
             </a-torus>
             
             <!-- System cząstek -->
             <a-entity id="particles1" position="0 0.5 0" 
-                particle-system="preset: default; color: #FF0000,#FF6666,#FFCCCC; particleCount: 50; maxAge: 2; size: 0.1; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0">
+                particle-system="preset: default; color: #FF0000,#FF6666,#FFCCCC; particleCount: 50; maxAge: 2; size: 0.1,0.15; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0; blending: 1; opacity: 0.8,0.3">
             </a-entity>
             
             <a-text 
@@ -146,31 +151,36 @@
             <!-- Punkt światła -->
             <a-light type="point" color="#00FF00" intensity="0" position="0 0.5 0" id="light2"></a-light>
             
-            <!-- Główna kula z animacją -->
+            <!-- Zielona kula -->
             <a-sphere
                 id="sphere2"
                 position="0 0.5 0"
-                radius="0.4"
+                radius="0.3"
                 color="#00FF00"
-                data-color="green"
                 metalness="0.5"
-                roughness="0.2"
-                animation="property: rotation; to: 0 360 0; dur: 3500; easing: linear; loop: true">
+                roughness="0.5"
+                data-color="green"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 18000; easing: linear"
+                animation__float="property: position; from: 0 0.5 0; to: 0 0.56 0; dir: alternate; loop: true; dur: 3500; easing: easeInOutSine">
             </a-sphere>
             
-            <!-- Pierścień wokół kuli -->
-            <a-torus
-                position="0 0.5 0"
-                radius="0.5"
-                radius-tubular="0.02"
+            <!-- Pierścień orbitujący -->
+            <a-torus 
+                radius="0.35" 
+                radius-tubular="0.015" 
                 color="#66FF66"
+                position="0 0.5 0"
+                rotation="90 0 0"
                 opacity="0.6"
-                animation="property: rotation; to: 360 0 0; dur: 4500; easing: linear; loop: true">
+                metalness="0.8"
+                roughness="0.2"
+                animation="property: rotation; to: 90 360 0; loop: true; dur: 3500; easing: linear"
+                animation__pulse="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine">
             </a-torus>
             
             <!-- System cząstek -->
             <a-entity id="particles2" position="0 0.5 0" 
-                particle-system="preset: default; color: #00FF00,#66FF66,#CCFFCC; particleCount: 50; maxAge: 2; size: 0.1; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0">
+                particle-system="preset: default; color: #00FF00,#66FF66,#CCFFCC; particleCount: 50; maxAge: 2; size: 0.1,0.15; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0; blending: 1; opacity: 0.8,0.3">
             </a-entity>
             
             <a-text 
@@ -200,31 +210,36 @@
             <!-- Punkt światła -->
             <a-light type="point" color="#0000FF" intensity="0" position="0 0.5 0" id="light3"></a-light>
             
-            <!-- Główna kula z animacją -->
+            <!-- Niebieska kula -->
             <a-sphere
                 id="sphere3"
                 position="0 0.5 0"
-                radius="0.4"
+                radius="0.3"
                 color="#0000FF"
-                data-color="blue"
                 metalness="0.5"
-                roughness="0.2"
-                animation="property: rotation; to: 0 360 0; dur: 3200; easing: linear; loop: true">
+                roughness="0.5"
+                data-color="blue"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 22000; easing: linear"
+                animation__float="property: position; from: 0 0.5 0; to: 0 0.54 0; dir: alternate; loop: true; dur: 2800; easing: easeInOutSine">
             </a-sphere>
             
-            <!-- Pierścień wokół kuli -->
-            <a-torus
-                position="0 0.5 0"
-                radius="0.5"
-                radius-tubular="0.02"
+            <!-- Pierścień orbitujący -->
+            <a-torus 
+                radius="0.35" 
+                radius-tubular="0.015" 
                 color="#6666FF"
+                position="0 0.5 0"
+                rotation="90 0 0"
                 opacity="0.6"
-                animation="property: rotation; to: 360 0 0; dur: 4200; easing: linear; loop: true">
+                metalness="0.8"
+                roughness="0.2"
+                animation="property: rotation; to: 90 360 0; loop: true; dur: 4500; easing: linear"
+                animation__pulse="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
             </a-torus>
             
             <!-- System cząstek -->
             <a-entity id="particles3" position="0 0.5 0" 
-                particle-system="preset: default; color: #0000FF,#6666FF,#CCCCFF; particleCount: 50; maxAge: 2; size: 0.1; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0">
+                particle-system="preset: default; color: #0000FF,#6666FF,#CCCCFF; particleCount: 50; maxAge: 2; size: 0.1,0.15; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0; blending: 1; opacity: 0.8,0.3">
             </a-entity>
             
             <a-text 
