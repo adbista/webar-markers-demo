@@ -728,4 +728,5 @@ video {
     filter: none !important;
     -webkit-filter: none !important;
     opacity: 1 !important;
+    background: transparent !important;
 }
