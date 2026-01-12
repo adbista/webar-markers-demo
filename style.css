@@ -706,3 +706,26 @@ body {
         font-size: 12px;
     }
 }
+
+/* Fix for mobile AR rendering - ensure no color filters */
+a-scene {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+a-scene canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+video {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Ensure AR camera feed is not affected by any filters */
+.a-canvas, canvas {
+    filter: none !important;
+    -webkit-filter: none !important;
+    opacity: 1 !important;
+}

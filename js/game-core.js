@@ -71,8 +71,24 @@ export class ARMemoryGame {
         // Hide AR.js loader
         const loader = document.querySelector('.arjs-loader');
         if (loader) {
+            console.log('🔧 Hiding loader...');
             loader.style.display = 'none';
+            loader.remove(); // Completely remove from DOM
         }
+        
+        // Check for any other overlays that might be blocking
+        setTimeout(() => {
+            const allDivs = document.querySelectorAll('div');
+            allDivs.forEach(div => {
+                const style = window.getComputedStyle(div);
+                if (style.position === 'fixed' || style.position === 'absolute') {
+                    const zIndex = parseInt(style.zIndex);
+                    if (zIndex > 100 && div.className !== 'arjs-loader') {
+                        console.log('🔍 Found overlay:', div.className || div.id, 'z-index:', zIndex);
+                    }
+                }
+            });
+        }, 1000);
         
         // Get model references
         CONFIG.COLOR_MAP.red.element = document.getElementById('sphere1');
