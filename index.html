@@ -1,89 +1,316 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>AR Memory Game - Gra Pamięciowa</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
-
-    <link rel="stylesheet" href="styles.css" />
-    <script src="scripts/ar-app.js" defer></script>
-  </head>
-
-  <body style='margin : 0px; overflow: hidden;'>
-    <div id="infoPanel" role="dialog">
-      <button id="infoClose" aria-label="Close">✕</button>
-      <div class="title" id="infoTitle"></div>
-      <div id="infoBody"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
+    
+    <!-- Custom component for bright colors -->
+    <script>
+        AFRAME.registerComponent('bright-glow', {
+            init: function() {
+                this.el.addEventListener('model-loaded', () => {
+                    const mesh = this.el.getObject3D('mesh');
+                    if (mesh) {
+                        mesh.traverse((node) => {
+                            if (node.isMesh && node.material) {
+                                node.material.emissiveIntensity = 1.5;
+                                node.material.toneMapped = false;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <script type="module" src="js/main.js"></script>
+</head>
+<body style="margin: 0px; overflow: hidden;">
+    <!-- AR.js Loading Screen -->
+    <div class="arjs-loader">
+        <div>Ładowanie AR, proszę czekać...</div>
     </div>
-    <button id="panelToggle" class="panelToggle off" aria-pressed="true" title="Toggle info panel">
-      ℹ️
-    </button>
+    
+    <div id="ui">
+        <div id="level">Poziom: 1</div>
+        <div id="score">Wynik: 0</div>
+        <div id="status">Obserwuj sekwencję...</div>
+        <div id="gesture-status">✋ Gesty: Nieaktywne</div>
+        <div id="combo">🔥 Combo: 0</div>
+    </div>
+    
+    <!-- Panel wyzwania gestowego -->
+    <div id="gesture-challenge" style="display:none;">
+        <div class="challenge-title">⚡ SZYBKA REAKCJA!</div>
+        <div id="gesture-prompt" class="gesture-prompt"></div>
+        <div class="challenge-timer" id="challenge-timer">10</div>
+    </div>
+    
+    <!-- Efekt sukcesu -->
+    <div id="gesture-success" style="display:none;">
+        <div class="success-emoji">&#x1F929;</div>
+        <div class="success-text">SUPER!</div>
+        <div class="success-sparkles">
+            <span class="sparkle">&#x2728;</span>
+            <span class="sparkle">&#x2728;</span>
+            <span class="sparkle">&#x2728;</span>
+            <span class="sparkle">&#x2728;</span>
+        </div>
+    </div>
+    
+    <!-- Efekt porażki -->
+    <div id="gesture-fail" style="display:none;">
+        <div class="fail-emoji">&#x1F622;</div>
+        <div class="fail-text">O NIE!</div>
+    </div>
+    
+    <canvas id="gesture-canvas" style="display:none;"></canvas>
+    
+    <button id="toggleUI" class="toggle-ui-btn">👁️</button>
+    
+    <div id="controls">
+        <button id="btnRed" class="color-btn red-btn" data-color="red">🔴<br>CZERWONY</button>
+        <button id="btnGreen" class="color-btn green-btn" data-color="green">🟢<br>ZIELONY</button>
+        <button id="btnBlue" class="color-btn blue-btn" data-color="blue">🔵<br>NIEBIESKI</button>
+    </div>
+    
+    <div id="gameOver">
+        <h1>Gra skończona!</h1>
+        <p id="finalScore">Osiągnięty poziom: 1</p>
+        <p id="finalPoints">Punkty: 0</p>
+        <button id="restartBtn">Zagraj ponownie</button>
+    </div>
+    
+    <div id="instructions">
+        🧠 Gra Pamięciowa AR<br>Zapamiętaj sekwencję błysków i kliknij/dotknij ekranu nad markerami!
+    </div>
 
     <a-scene
-      vr-mode-ui="enabled: false;"
-      loading-screen="enabled: false;"
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-      embedded
-      gesture-detector
-    >
-      <a-marker
-        id="m0"
-        type="pattern"
-        preset="custom"
-        url="assets/marker.patt"
-        emitevents="true"
-      >
-        <a-image
-          id="img-main"
-          src="assets/asset.png"
-          scale="1 1 1"
-          rotation="-90 0 0"
-          gesture-handler
-        ></a-image>
-      </a-marker>
+        embedded
+        arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true; precision: medium; antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true; maxCanvasWidth: 1920; maxCanvasHeight: 1920;"
+        cursor="rayOrigin: mouse">
+        
+        <!-- Marker 1 - Czerwony -->
+        <a-marker type="pattern" url="assets/marker.patt" id="marker1" emitevents="true">
+            <a-plane
+                id="clickable1"
+                position="0 0.5 0"
+                rotation="-90 0 0"
+                width="1.5"
+                height="1.5"
+                color="red"
+                opacity="0.01"
+                class="clickable"
+                data-color="red">
+            </a-plane>
+            
+            <!-- Punkt światła -->
+            <a-light type="point" color="#FF0000" intensity="1.5" position="0 0.5 0" id="light1"></a-light>
+            
+            <!-- Czerwona kula -->
+            <a-sphere
+                id="sphere1"
+                position="0 0.5 0"
+                radius="0.3"
+                material="color: #FF3333; emissive: #FF0000; emissiveIntensity: 0.8; metalness: 0.3; roughness: 0.3;"
+                data-color="red"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear"
+                animation__bounce="property: position; from: 0 0.3 0; to: 0 0.7 0; dir: alternate; loop: true; dur: 1500; easing: easeInOutQuad">
+            </a-sphere>
+            
+            <!-- Pierścień orbitujący -->
+            <a-torus 
+                radius="0.35" 
+                radius-tubular="0.015" 
+                material="color: #FF6666; emissive: #FF3333; emissiveIntensity: 0.6; opacity: 0.8; metalness: 0.8; roughness: 0.2; transparent: true;"
+                position="0 0.5 0"
+                rotation="90 0 0"
+                animation="property: rotation; to: 90 360 0; loop: true; dur: 4000; easing: linear"
+                animation__pulse="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine">
+            </a-torus>
+            
+            <!-- System cząstek -->
+            <a-entity id="particles1" position="0 0.5 0" 
+                particle-system="preset: default; color: #FF0000,#FF6666,#FFCCCC; particleCount: 50; maxAge: 2; size: 0.1,0.15; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0; blending: 1; opacity: 0.8,0.3">
+            </a-entity>
+            
+            <!-- Wskaźnik aktywności -->
+            <a-cone 
+                id="indicator1"
+                position="0 1.3 0" 
+                radius-bottom="0.15" 
+                radius-top="0.05" 
+                height="0.25"
+                material="color: #FFD700; emissive: #FFD700; emissiveIntensity: 2.0; metalness: 0.8; opacity: 0.9; transparent: true;"
+                rotation="180 0 0"
+                visible="false"
+                animation__glow="property: material.emissiveIntensity; from: 2.0; to: 3.5; dir: alternate; loop: true; dur: 300; easing: easeInOutQuad"
+                animation__bounce="property: position; from: 0 1.2 0; to: 0 1.4 0; dir: alternate; loop: true; dur: 400; easing: easeInOutSine">
+            </a-cone>
+            
+            <a-text 
+                value="Czerwony" 
+                align="center"
+                position="0 1.2 0" 
+                scale="0.4 0.4 0.4"
+                color="#FFFFFF"
+                animation="property: scale; to: 0.45 0.45 0.45; dir: alternate; dur: 1000; loop: true">
+            </a-text>
+        </a-marker>
 
-      <a-marker
-        id="m1"
-        type="pattern"
-        preset="custom"
-        url="assets/markerApple.patt"
-        emitevents="true"
-      >
-        <a-image
-          id="img-apple"
-          src="assets/assetApple.jpeg"
-          scale="1 1 1"
-          rotation="-90 0 0"
-          gesture-handler
-        ></a-image>
-      </a-marker>
+        <!-- Marker 2 - Zielony -->
+        <a-marker type="pattern" url="assets/markerApple.patt" id="marker2" emitevents="true">
+            <a-plane
+                id="clickable2"
+                position="0 0.5 0"
+                rotation="-90 0 0"
+                width="1.5"
+                height="1.5"
+                color="green"
+                opacity="0.01"
+                class="clickable"
+                data-color="green">
+            </a-plane>
+            
+            <!-- Punkt światła -->
+            <a-light type="point" color="#00FF00" intensity="1.5" position="0 0.5 0" id="light2"></a-light>
+            
+            <!-- Zielona kula -->
+            <a-sphere
+                id="sphere2"
+                position="0 0.5 0"
+                radius="0.3"
+                material="color: #33FF33; emissive: #00FF00; emissiveIntensity: 0.8; metalness: 0.3; roughness: 0.3;"
+                data-color="green"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 18000; easing: linear"
+                animation__bounce="property: position; from: 0 0.3 0; to: 0 0.7 0; dir: alternate; loop: true; dur: 1300; easing: easeInOutQuad">
+            </a-sphere>
+            
+            <!-- Pierścień orbitujący -->
+            <a-torus 
+                radius="0.35" 
+                radius-tubular="0.015" 
+                material="color: #66FF66; emissive: #33FF33; emissiveIntensity: 0.6; opacity: 0.8; metalness: 0.8; roughness: 0.2; transparent: true;"
+                position="0 0.5 0"
+                rotation="90 0 0"
+                animation="property: rotation; to: 90 360 0; loop: true; dur: 3500; easing: linear"
+                animation__pulse="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine">
+            </a-torus>
+            
+            <!-- System cząstek -->
+            <a-entity id="particles2" position="0 0.5 0" 
+                particle-system="preset: default; color: #00FF00,#66FF66,#CCFFCC; particleCount: 50; maxAge: 2; size: 0.1,0.15; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0; blending: 1; opacity: 0.8,0.3">
+            </a-entity>
+            
+            <!-- Wskaźnik aktywności -->
+            <a-cone 
+                id="indicator2"
+                position="0 1.3 0" 
+                radius-bottom="0.15" 
+                radius-top="0.05" 
+                height="0.25"
+                material="color: #FFD700; emissive: #FFD700; emissiveIntensity: 2.0; metalness: 0.8; opacity: 0.9; transparent: true;"
+                rotation="180 0 0"
+                visible="false"
+                animation__glow="property: material.emissiveIntensity; from: 2.0; to: 3.5; dir: alternate; loop: true; dur: 300; easing: easeInOutQuad"
+                animation__bounce="property: position; from: 0 1.2 0; to: 0 1.4 0; dir: alternate; loop: true; dur: 400; easing: easeInOutSine">
+            </a-cone>
+            
+            <a-text 
+                value="Zielony" 
+                align="center" 
+                position="0 1.2 0" 
+                scale="0.4 0.4 0.4"
+                color="#FFFFFF"
+                animation="property: scale; to: 0.45 0.45 0.45; dir: alternate; dur: 1000; loop: true">
+            </a-text>
+        </a-marker>
 
-      <a-marker 
-        id="m2" 
-        type="pattern" 
-        preset="custom" 
-        url="assets/dot0.patt" 
-        raycaster="objects: .clickable" 
-        emitevents="true" 
-        cursor="fuse: false; rayOrigin: mouse;"
-      >
-        <a-image
-          src="assets/assetDot.png"
-          scale="1 1 1"
-          class="clickable"
-          rotation="-90 0 0"
-          gesture-handler
-        ></a-image>
-      </a-marker>
+        <!-- Marker 3 - Niebieski -->
+        <a-marker type="pattern" url="assets/dot0.patt" id="marker3" emitevents="true">
+            <a-plane
+                id="clickable3"
+                position="0 0.5 0"
+                rotation="-90 0 0"
+                width="1.5"
+                height="1.5"
+                color="blue"
+                opacity="0.01"
+                class="clickable"
+                data-color="blue">
+            </a-plane>
+            
+            <!-- Punkt światła -->
+            <a-light type="point" color="#0000FF" intensity="1.5" position="0 0.5 0" id="light3"></a-light>
+            
+            <!-- Niebieska kula -->
+            <a-sphere
+                id="sphere3"
+                position="0 0.5 0"
+                radius="0.3"
+                material="color: #3333FF; emissive: #0000FF; emissiveIntensity: 0.8; metalness: 0.3; roughness: 0.3;"
+                data-color="blue"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 22000; easing: linear"
+                animation__bounce="property: position; from: 0 0.3 0; to: 0 0.7 0; dir: alternate; loop: true; dur: 1700; easing: easeInOutQuad">
+            </a-sphere>
+            
+            <!-- Pierścień orbitujący -->
+            <a-torus 
+                radius="0.35" 
+                radius-tubular="0.015" 
+                material="color: #6666FF; emissive: #3333FF; emissiveIntensity: 0.6; opacity: 0.8; metalness: 0.8; roughness: 0.2; transparent: true;"
+                position="0 0.5 0"
+                rotation="90 0 0"
+                animation="property: rotation; to: 90 360 0; loop: true; dur: 4500; easing: linear"
+                animation__pulse="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
+            </a-torus>
+            
+            <!-- System cząstek -->
+            <a-entity id="particles3" position="0 0.5 0" 
+                particle-system="preset: default; color: #0000FF,#6666FF,#CCCCFF; particleCount: 50; maxAge: 2; size: 0.1,0.15; velocityValue: 0 1 0; velocitySpread: 0.3 0.3 0.3; accelerationValue: 0 -0.5 0; blending: 1; opacity: 0.8,0.3">
+            </a-entity>
+            
+            <!-- Wskaźnik aktywności -->
+            <a-cone 
+                id="indicator3"
+                position="0 1.3 0" 
+                radius-bottom="0.15" 
+                radius-top="0.05" 
+                height="0.25"
+                material="color: #FFD700; emissive: #FFD700; emissiveIntensity: 2.0; metalness: 0.8; opacity: 0.9; transparent: true;"
+                rotation="180 0 0"
+                visible="false"
+                animation__glow="property: material.emissiveIntensity; from: 2.0; to: 3.5; dir: alternate; loop: true; dur: 300; easing: easeInOutQuad"
+                animation__bounce="property: position; from: 0 1.2 0; to: 0 1.4 0; dir: alternate; loop: true; dur: 400; easing: easeInOutSine">
+            </a-cone>
+            
+            <a-text 
+                value="Niebieski" 
+                align="center" 
+                position="0 1.2 0" 
+                scale="0.4 0.4 0.4"
+                color="#FFFFFF"
+                animation="property: scale; to: 0.45 0.45 0.45; dir: alternate; dur: 1000; loop: true">
+            </a-text>
+        </a-marker>
 
-      <a-entity id="energyField" energy-triangle="m0:#m0; m1:#m1; m2:#m2"></a-entity>
-      
-      <a-entity camera class="camera"></a-entity>
-     
+        <a-entity light="type: ambient; intensity: 1.2;"></a-entity>
+        <a-entity light="type: directional; intensity: 0.8;" position="1 1 1"></a-entity>
+
+        <a-entity
+            camera
+            cursor="rayOrigin: mouse; fuse: false"
+            raycaster="objects: .clickable">
+        </a-entity>
     </a-scene>
-
-  </body>
+</body>
 </html>
