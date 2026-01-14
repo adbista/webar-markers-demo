@@ -1,7 +1,5 @@
 # AR Memory Game with Hand Gesture Challenges
 
-This project was developed with AI assistance (GitHub Copilot).
-
 An interactive augmented reality memory game built with A-Frame and AR.js, featuring advanced 3D animations, particle systems, dynamic lighting, and hand gesture recognition using MediaPipe.
 
 ## Project Description
@@ -147,5 +145,3 @@ Open: `http://localhost:8000`
 ![demo-preview](https://github.com/user-attachments/assets/c220d6b9-1e68-4deb-b961-1c135c7553bc)
 
 ---
-
-Developed with AI assistance using GitHub Copilot
