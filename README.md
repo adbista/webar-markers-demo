@@ -1,83 +1,91 @@
-# AR Memory Game with Hand Gesture Challenges
 
-An interactive augmented reality memory game built with A-Frame and AR.js, featuring advanced 3D animations, particle systems, dynamic lighting, and hand gesture recognition using MediaPipe.
+# AR Memory Game
 
-## Project Description
+An interactive Augmented Reality (AR) memory game built with **A-Frame** and **AR.js**, featuring 3D animations, particle effects, dynamic lighting, and real-time hand gesture recognition using **MediaPipe Hands**.
 
-AR Memory Game is an enhanced version of the classic Simon Says game in augmented reality. Players must remember and repeat sequences of colored spheres displayed above AR markers. The game includes an innovative gesture-based audio challenge system that tests reaction speed and hand recognition skills.
+## Source code
+Repository: https://github.com/adbista/webar-markers-demo
 
-## Core Gameplay
+---
 
-- Watch the sequence of colored sphere flashes
-- Repeat the sequence by clicking buttons, tapping AR markers, or using hand gestures
-- Each correct sequence increases the level and adds a new element
-- Complete gesture challenges when they appear for bonus points
-- One mistake ends the game
+## Project overview
+The player watches a sequence of activations of colored spheres displayed above AR markers, and then must reproduce the sequence in the same order.  
+An activation means: the sphere jumps, a yellow dot appears on it, and a sound is played. During gameplay, random audio-visual challenges may appear that require performing a specific hand gesture to distract the player and test reflexes.
 
-### Color Markers
+---
 
-1. Red Sphere (marker.patt) - Musical note C (261.63 Hz)
-2. Green Sphere (markerApple.patt) - Musical note E (329.63 Hz)
-3. Blue Sphere (dot0.patt) - Musical note G (392.00 Hz)
+## Core gameplay rules
+- The game shows a sequence — spheres/markers light up one by one and play animations.
+- Your goal is to memorize the sequence and reproduce it in the same order.
+- After a correct sequence, the level increases and the sequence becomes longer by one element.
+- At a random moment, a gesture challenge (audio + visual prompt) may appear to intentionally distract you.
+- One mistake in the sequence or a failed gesture challenge ends the game (**game over**).
 
-## Hand Gesture Challenge System
+---
 
-During gameplay, random audio-visual challenges may appear requiring quick hand gesture responses:
+## Step-by-step instructions
+1. Use the marker set from `example.png` (or print/use `marker1.png`, `marker2.png`, `marker3.png` separately).
+2. Run the game (online or locally).
+3. Allow camera access.
+4. Point the camera so that **all 3 markers are visible at the same time** — **this starts the game** (all three must be visible).
+5. Watch the sequence of sphere highlights/animations.
+6. Reproduce the sequence using the buttons and/or AR interaction.
+7. When a gesture challenge appears, show the required gesture within the time limit.
+8. The game continues until you make a mistake.
 
-### Challenge Types
+---
 
-- High Sound (880 Hz) - Requires thumbs up gesture
+## Marker colors
+- **Red sphere**
+- **Green sphere**
+- **Blue sphere**
 
-### Challenge Mechanics
+---
 
-- Audio cue plays with visual prompt showing required gesture
-- 10-second countdown timer
-- Failed challenge results in gameover
+## Required markers (print/use)
+The required marker set is included in **`example.png`** (download/print it).  
+Optionally, you can use separate files: **`marker1.png`**, **`marker2.png`**, **`marker3.png`**.
 
-## Advanced Features
+### Marker set (`example.png`)
+![Required marker set (example.png)](./example.png)
 
-### 3D Animations and Visual Effects
+### Separate markers
+<p float="left">
+  <img src="./marker1.png" width="32%" />
+  <img src="./marker2.png" width="32%" />
+  <img src="./marker3.png" width="32%" />
+</p>
 
-- Rotating spheres with individual animation speeds
-- Torus rings orbiting each sphere
-- Particle systems (50-100 particles per marker)
-- Dynamic point lighting synchronized with interactions
-- PBR materials with metalness and roughness properties
-- Scale animations on interaction
-- Celebration effects on level completion
+---
 
-### Hand Gesture Recognition
+## Hand gesture challenge system
+During gameplay, random audio-visual challenges may appear that require a fast reaction and a correct hand gesture.  
+Additionally, showing an **open palm** allows you to **retry once** when reproducing the sequence.
 
-- MediaPipe Hands integration for real-time gesture detection
-- Gesture type: thumbs up
-- Independent from marker-based gameplay
-- Visual status indicator showing gesture system state
+### Challenge mechanics
+- An audio cue plays and a visual hint of the required gesture is shown.
+- A **15-second countdown** starts.
+- No correct gesture in time (or incorrect recognition) results in **game over**.
 
-### Audio System
+### Detected gestures
+- **Thumbs up**
+- **Peace sign (V)**
 
-- Unique tones for each color (C-E-G musical scale)
-- High/low challenge sounds
-- Success melody (C-E-G-C progression)
-- Failure sound effects
-- Web Audio API synthesis
+---
 
-### Combo System
+## How to run
 
-- Tracks consecutive correct answers
-- Bonus multiplier at combo greater than 5
-- Visual feedback with color and size changes
-- Resets on incorrect answer
+### Method 0: Online (easiest)
+Open: https://adbista.github.io/webar-markers-demo/
 
-### Dynamic Lighting
+### Method 1: Local (recommended for dev) — local server
+First, clone the repository:
+```bash
+git clone https://github.com/adbista/webar-markers-demo
+cd webar-markers-demo
+````
 
-- Point lights at each marker position
-- Intensity bursts during interactions
-- Color-matched to sphere colors
-- Synchronized with particle effects
-
-## How to Run
-
-### Method 1: Local Server (Recommended)
+Then start a server:
 
 ```bash
 # Python 3
@@ -87,61 +95,93 @@ python -m http.server 8000
 npx http-server -p 8000
 ```
 
-Open: `http://localhost:8000`
+Open:
 
-### Method 2: Visual Studio Code
+* [http://localhost:8000](http://localhost:8000)
 
-1. Install "Live Server" extension
-2. Right-click on `index.html`
-3. Select "Open with Live Server"
+### Method 2: Visual Studio Code (Live Server)
 
-## Requirements
+First, clone the repository:
 
-- WebRTC-capable browser (Chrome, Firefox, Safari)
-- Camera access (for AR and gesture detection)
-- Printed AR markers (pattern files in assets folder)
-- HTTPS or localhost (required for camera permissions)
-- Good lighting conditions for marker tracking
+```bash
+git clone https://github.com/adbista/webar-markers-demo
+cd webar-markers-demo
+```
 
-## Game Instructions
+Then:
 
-1. Print markers from `assets/` folder
-2. Launch game in browser
-3. Allow camera access
-4. Point camera at all 3 markers to start
-5. Watch the sequence of flashing spheres
-6. Repeat sequence using buttons and AR markers
-7. Complete gesture challenge when it appear
-8. Continue until making a mistake
-
-## Technologies Used
-
-### Core Frameworks
-
-- A-Frame 1.6.0 - WebVR/AR framework
-- AR.js 3.4.5 - Marker-based AR tracking
-- MediaPipe Hands - Hand gesture recognition
-- Web Audio API - Sound synthesis
-
-### A-Frame Components
-
-- a-sphere - Main game objects
-- a-torus - Orbital rings
-- a-light (point) - Dynamic lighting
-- a-entity with particle-system - Particle effects
-- a-text - 3D labels
-- a-marker - AR tracking
-
-### Features Implemented
-
-- PBR materials (metalness, roughness)
-- Animation system (rotation, scale, position)
-- Event system (markerFound, markerLost, click)
-- Camera integration
-- Custom gesture detection algorithms
-
-
-## DEMO
-![demo-preview](https://github.com/user-attachments/assets/c220d6b9-1e68-4deb-b961-1c135c7553bc)
+1. Install the **Live Server** extension
+2. Right-click `index.html`
+3. Select **Open with Live Server**
 
 ---
+
+## Requirements & recommendations
+
+* A browser with **WebRTC** support + camera access (AR + gesture detection)
+* Good lighting (improves marker tracking)
+* **Recommended: Chrome + a tablet** (usually more stable tracking and more comfortable controls)
+
+---
+
+## Technologies used
+
+### Main frameworks
+
+* **A-Frame 1.6.0** — WebVR/AR framework
+* **AR.js 3.4.5** — marker-based AR tracking
+* **MediaPipe Hands** — hand/gesture recognition
+* **Web Audio API** — sound synthesis
+
+### A-Frame components
+
+* `a-sphere` — main game objects
+* `a-torus` — orbital rings
+* `a-light` (point) — dynamic lighting
+* `a-entity` + `particle-system` — particle effects
+* `a-text` — 3D labels
+* `a-marker` — AR marker tracking
+
+---
+
+## Advanced features
+
+### 3D animations & visuals
+
+* Rotating spheres with individual animation speeds
+* `a-torus` rings orbiting around each sphere
+* Dynamic point lighting synchronized with interactions
+* Scale animations on interaction
+* Celebration effects after completing a level
+
+### Gesture recognition
+
+* Real-time hand tracking via **MediaPipe Hands**
+* **Detected gestures:** **thumbs up** and **peace (V)**
+* Works independently of marker tracking (separate input pipeline)
+* Status indicator showing the gesture system state
+
+### Audio system
+
+* Unique tones for colors (C–E–G scale)
+* Challenge sounds (e.g., 880 Hz high tone)
+* Success melody (C–E–G–C progression)
+* Failure sounds
+* Audio synthesized using **Web Audio API**
+
+### Combo system
+
+* Counts consecutive correct inputs
+* Bonus multiplier for combos `> 5`
+* Visual feedback (color/size changes)
+* Resets after a wrong input
+
+---
+
+## Demo
+
+demo-preview:
+[https://github.com/user-attachments/assets/c220d6b9-1e68-4deb-b961-1c135c7553bc](https://github.com/user-attachments/assets/c220d6b9-1e68-4deb-b961-1c135c7553bc)
+
+```
+```
